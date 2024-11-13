@@ -12,13 +12,13 @@ datasource db {
 }
 
 model User {
-  id          String @id @default(uuid())
-  username    String @unique
-  password    String
-  name        String
-  email       String
-  phoneNumber String
-  pictureUrl  String
+  id              String @id @default(uuid())
+  username        String @unique
+  password        String
+  name            String
+  email           String
+  phoneNumber     String
+  profilePicture  String?
 
   // 1-on-many: One User can have many reviews and bookings
   reviews  Review[] // relation from User to Review
@@ -65,7 +65,7 @@ model Property {
   pricePerNight  Float
   bedroomCount   Int
   bathRoomCount  Int
-  maxGuestsCount Int
+  maxGuestCount  Int
   rating         Int
 
   // One-to-many: One property can have many bookings
@@ -90,14 +90,14 @@ model Amenity {
 }
 
 model Host {
-  id          String @id @default(uuid())
-  username    String @unique
-  password    String
-  name        String
-  email       String
-  phoneNumber String
-  pictureUrl  String
-  aboutMe     String
+  id              String @id @default(uuid())
+  username        String @unique
+  password        String
+  name            String
+  email           String
+  phoneNumber     String
+  profilePicture  String?
+  aboutMe         String
 
   // One-to-many: One host can have many properties for rental
   listings Property[]
