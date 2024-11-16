@@ -20,10 +20,13 @@ router.post("/", auth, async (req, res, next) => {
   }
 });
 
-// Get all reviews
+// Get all reviews with optional query parameters
 router.get("/", async (req, res, next) => {
   try {
-    const reviews = await getReviews();
+    const { userId, propertyId, rating, comment } = req.query;
+
+    // getReviews call with filter
+    const reviews = await getReviews(userId, propertyId, rating, comment);
     res.json(reviews);
   } catch (error) {
     next(error);

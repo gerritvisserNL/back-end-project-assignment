@@ -40,10 +40,17 @@ router.post("/", auth, async (req, res, next) => {
   }
 });
 
-// Get all properties
+// Get all properties with optional query parameters
 router.get("/", async (req, res, next) => {
   try {
-    const properties = await getProperties();
+    const { location, pricePerNight, amenities } = req.query; // Queryparameters
+
+    // getProperties call with filters
+    const properties = await getProperties({
+      location,
+      pricePerNight,
+      amenities,
+    });
     res.json(properties);
   } catch (error) {
     next(error);

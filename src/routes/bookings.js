@@ -37,7 +37,7 @@ router.post("/", auth, async (req, res, next) => {
   }
 });
 
-// Get all bookings
+// Get all bookings with optional query parameters
 router.get("/", async (req, res, next) => {
   try {
     const {
@@ -49,6 +49,8 @@ router.get("/", async (req, res, next) => {
       totalPrice,
       bookingStatus,
     } = req.query;
+
+    // getBookings call with filter
     const bookings = await getBookings(
       userId,
       propertyId,

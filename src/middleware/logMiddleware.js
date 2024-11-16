@@ -1,14 +1,17 @@
-import logger from "../utils/log.js";
+import logger from "../utils/logger.js";
 
-const log = (req, res, next) => {
-  const start = new Date();
+const logMiddleware = (req, res, next) => {
+  const start = Date.now();
 
-  next();
+  res.on("finish", () => {
+    // Wait until response is fully processed
+    const duration = Date.now() - start;
+    logger.info(
+      `${req.method} ${req.originalUrl} - Status: ${res.statusCode} - Duration: ${duration} ms`
+    );
+  });
 
-  const ms = new Date() - start;
-  logger.info(
-    `${req.method} ${req.originalUrl}. Status: ${res.statusCode}. Duration: ${ms} ms`
-  );
+  next(); // Go to next middleware or route-handler
 };
 
-export default log;
+export default logMiddleware;

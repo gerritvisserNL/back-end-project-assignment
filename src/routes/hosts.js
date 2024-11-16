@@ -36,10 +36,21 @@ router.post("/", auth, async (req, res, next) => {
   }
 });
 
-// Get all hosts
+// Get all hosts with optional query parameters
 router.get("/", async (req, res, next) => {
   try {
-    const hosts = await getHosts();
+    const { username, name, email, phoneNumber, profilePicture, aboutMe } =
+      req.query;
+
+    // getHosts call with filter
+    const hosts = await getHosts({
+      username,
+      name,
+      email,
+      phoneNumber,
+      profilePicture,
+      aboutMe,
+    });
     res.json(hosts);
   } catch (error) {
     next(error);

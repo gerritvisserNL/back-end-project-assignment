@@ -33,11 +33,13 @@ router.post("/", auth, async (req, res, next) => {
   }
 });
 
-// Get all users
+// Get all users with optional query parameters
 router.get("/", async (req, res, next) => {
   try {
     const { id, username, name, email, phoneNumber, profilePicture } =
       req.query;
+
+    // getUsers call with filter
     const users = await getUsers(
       id,
       username,
