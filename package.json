@@ -29,6 +29,7 @@
     "winston": "^3.10.0"
   },
   "devDependencies": {
+    "kill-port": "^2.0.1",
     "newman": "^6.0.0",
     "nodemon": "^3.0.1",
     "prisma": "^5.22.0"

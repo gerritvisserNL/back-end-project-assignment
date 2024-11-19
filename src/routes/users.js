@@ -1,5 +1,4 @@
 import { Router } from "express";
-import bcrypt from "bcrypt";
 import getUsers from "../services/users/getUsers.js";
 import createUser from "../services/users/createUser.js";
 import getUserById from "../services/users/getUserById.js";
@@ -15,12 +14,9 @@ router.post("/", async (req, res, next) => {
     const { username, password, name, email, phoneNumber, profilePicture } =
       req.body;
 
-    // Hash the password before storing it
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = await createUser(
       username,
-      hashedPassword,
+      password,
       name,
       email,
       phoneNumber,
@@ -77,14 +73,9 @@ router.put("/:id", auth, async (req, res, next) => {
     const { username, password, name, email, phoneNumber, profilePicture } =
       req.body;
 
-    // Hash the password if provided
-    const hashedPassword = password
-      ? await bcrypt.hash(password, 10)
-      : undefined;
-
     const updatedUser = await updateUserById(id, {
       username,
-      password: hashedPassword || password,
+      password,
       name,
       email,
       phoneNumber,
