@@ -1,12 +1,27 @@
 import { PrismaClient } from "@prisma/client";
 
-const deleteHostById = async (id) => {
-  const prisma = new PrismaClient();
-  const host = await prisma.host.deleteMany({
-    where: { id },
-  });
+const prisma = new PrismaClient();
 
-  return host.count > 0 ? id : null;
+const deleteHostById = async (id) => {
+  try {
+    // Delete all related properties of the host first
+    await prisma.property.deleteMany({
+      where: {
+        hostId: id,
+      },
+    });
+
+    // Delete the host afterwards
+    const host = await prisma.host.delete({
+      where: { id },
+    });
+
+    // If the host is successfully deleted, return the id, otherwise return null
+    return host ? id : null;
+  } catch (error) {
+    console.error("Error deleting host:", error);
+    throw new Error("Failed to delete host.");
+  }
 };
 
 export default deleteHostById;

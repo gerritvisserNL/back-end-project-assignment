@@ -1,17 +1,23 @@
 import express from "express";
 import * as Sentry from "@sentry/node";
 import "dotenv/config";
-import amenitiesRouter from "./routes/amenities.json";
-import bookingsRouter from "./routes/bookings.json";
-import hostsRouter from "./routes/hosts.json";
-import propertiesRouter from "./routes/properties.json";
-import reviewsRouter from "./routes/reviews.json";
+import amenitiesRouter from "./routes/amenities.js";
+import bookingsRouter from "./routes/bookings.js";
+import hostsRouter from "./routes/hosts.js";
+import propertiesRouter from "./routes/properties.js";
+import reviewsRouter from "./routes/reviews.js";
 import usersRouter from "./routes/users.js";
 import loginRouter from "./routes/login.js";
 import logMiddleware from "./middleware/logMiddleware.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
+
+app.use(express.static("public"));
+
+app.get("/", (req, res) => {
+  res.send("Welcome to my Bookings API!");
+});
 
 // Sentry
 Sentry.init({
@@ -57,5 +63,5 @@ app.use(Sentry.Handlers.errorHandler());
 app.use(errorHandler);
 
 app.listen(3000, () => {
-  console.log("Server is listening on port 3000");
+  console.log(`Server is running at http://localhost:3000`);
 });

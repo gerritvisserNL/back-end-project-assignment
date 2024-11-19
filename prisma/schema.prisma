@@ -33,10 +33,10 @@ model Review {
   comment    String
 
   // Relation to User
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Relation to Property
-  property Property @relation(fields: [propertyId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model Booking {
@@ -46,14 +46,14 @@ model Booking {
   checkinDate    DateTime
   checkoutDate   DateTime
   numberOfGuests Int
-  totalPrice     Int
+  totalPrice     Float
   bookingStatus  String
 
   // Relation to User
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Relation to Property
-  property Property @relation(fields: [propertyId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model Property {
@@ -75,7 +75,7 @@ model Property {
   amenities Amenity[] @relation("PropertyAmenity")
 
   // One-to-many relationship: One host can have multiple properties
-  host Host @relation(fields: [hostId], references: [id])
+  host Host @relation(fields: [hostId], references: [id], onDelete: Cascade)
 
   // One-to-many: One property can have many reviews
   reviews Review[]

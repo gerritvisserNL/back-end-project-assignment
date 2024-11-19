@@ -43,14 +43,16 @@ router.post("/", auth, async (req, res, next) => {
 // Get all properties with optional query parameters
 router.get("/", async (req, res, next) => {
   try {
-    const { location, pricePerNight, amenities } = req.query; // Queryparameters
+    // Get queryparameters and set default values.
+    const location = req.query.location || ""; // Default: empty string
+    const pricePerNight = req.query.pricePerNight
+      ? parseFloat(req.query.pricePerNight)
+      : undefined; // Cast to float
+    const amenities = req.query.amenities || ""; // Default: empty string
 
-    // getProperties call with filters
-    const properties = await getProperties({
-      location,
-      pricePerNight,
-      amenities,
-    });
+    // Call getProperties()
+    const properties = await getProperties(location, pricePerNight, amenities);
+
     res.json(properties);
   } catch (error) {
     next(error);
@@ -123,7 +125,6 @@ router.delete("/:id", auth, async (req, res, next) => {
     if (property) {
       res.status(200).send({
         message: `Property with id ${id} successfully deleted`,
-        property,
       });
     } else {
       res.status(404).json({

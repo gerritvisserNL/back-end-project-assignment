@@ -21,8 +21,19 @@ const getHosts = async (
   if (profilePicture) filter.profilePicture = profilePicture;
   if (aboutMe) filter.aboutMe = aboutMe;
 
+  // Find hosts with the specified filters
   const hosts = await prisma.host.findMany({
     where: filter,
+    select: {
+      id: true,
+      username: true,
+      name: true,
+      email: true,
+      phoneNumber: true,
+      profilePicture: true,
+      aboutMe: true,
+      // Exclude password field
+    },
   });
 
   return hosts;

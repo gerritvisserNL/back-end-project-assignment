@@ -84,7 +84,6 @@ router.delete("/:id", auth, async (req, res, next) => {
     if (review) {
       res.status(200).send({
         message: `Review with id ${id} successfully deleted`,
-        review,
       });
     } else {
       res.status(404).json({

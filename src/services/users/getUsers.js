@@ -24,6 +24,15 @@ const getUsers = async (
   // Find users who match filter criteria
   const users = await prisma.user.findMany({
     where: filter,
+    select: {
+      id: true,
+      username: true,
+      name: true,
+      email: true,
+      phoneNumber: true,
+      profilePicture: true,
+      // Exclude the password field
+    },
   });
 
   return users;

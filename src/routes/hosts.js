@@ -119,7 +119,6 @@ router.delete("/:id", auth, async (req, res, next) => {
     if (host) {
       res.status(200).send({
         message: `Host with id ${id} successfully deleted`,
-        host,
       });
     } else {
       res.status(404).json({

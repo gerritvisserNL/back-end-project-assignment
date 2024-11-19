@@ -10,7 +10,7 @@ import auth from "../middleware/auth.js";
 const router = Router();
 
 // Create a new user
-router.post("/", auth, async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     const { username, password, name, email, phoneNumber, profilePicture } =
       req.body;
