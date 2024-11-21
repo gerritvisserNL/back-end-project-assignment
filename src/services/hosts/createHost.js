@@ -20,11 +20,23 @@ const createHost = async (
   };
 
   const prisma = new PrismaClient();
-  const host = await prisma.host.create({
-    data: newHost,
-  });
 
-  return host;
+  try {
+    // Create a new host
+    const host = await prisma.host.create({
+      data: newHost,
+    });
+
+    return host;
+  } catch (error) {
+    console.error("Error creating host:", error);
+
+    const err = new Error("Failed to create host");
+    err.statusCode = 500;
+    throw err;
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default createHost;

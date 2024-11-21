@@ -1,10 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 
-const getAmenities = async () => {
-  const prisma = new PrismaClient();
-  const amenities = await prisma.amenity.findMany();
+const prisma = new PrismaClient();
 
-  return amenities;
+const getAmenities = async () => {
+  try {
+    const amenities = await prisma.amenity.findMany();
+    return amenities;
+  } catch (error) {
+    console.error("Error retrieving amenities:", error);
+    throw new Error("Failed to retrieve amenities");
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default getAmenities;

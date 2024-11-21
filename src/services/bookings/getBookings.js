@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient(); // Placed outside function to prevent repeated creation of PrismaClient
+const prisma = new PrismaClient();
 
 const getBookings = async (
   userId,
@@ -11,24 +11,42 @@ const getBookings = async (
   totalPrice,
   bookingStatus
 ) => {
-  // Empty filter object
-  const filter = {};
+  try {
+    // Empty filter object
+    const filter = {};
 
-  // Only add fields to filter that have a value
-  if (userId) filter.userId = userId;
-  if (propertyId) filter.propertyId = propertyId;
-  if (checkinDate) filter.checkinDate = new Date(checkinDate);
-  if (checkoutDate) filter.checkoutDate = new Date(checkoutDate);
-  if (numberOfGuests) filter.numberOfGuests = Number(numberOfGuests);
-  if (totalPrice) filter.totalPrice = Number(totalPrice);
-  if (bookingStatus) filter.bookingStatus = bookingStatus;
+    if (userId && typeof userId === "object" && userId.userId) {
+      filter.userId = userId.userId; // Get userId out the object
+    } else if (userId) {
+      filter.userId = userId; // If userId is a string, use it.
+    }
 
-  // Retrieve bookings with filter
-  const bookings = await prisma.booking.findMany({
-    where: filter,
-  });
+    // Only add fields to filter that have a value
+    if (propertyId) filter.propertyId = propertyId;
+    if (checkinDate) filter.checkinDate = new Date(checkinDate);
+    if (checkoutDate) filter.checkoutDate = new Date(checkoutDate);
+    if (numberOfGuests) filter.numberOfGuests = Number(numberOfGuests);
+    if (totalPrice) filter.totalPrice = Number(totalPrice);
+    if (bookingStatus) filter.bookingStatus = bookingStatus;
 
-  return bookings;
+    console.log("Filter", filter);
+    // Retrieve bookings with filter
+    const bookings = await prisma.booking.findMany({
+      where: filter,
+    });
+    console.log("Bookings:", bookings);
+
+    return bookings;
+  } catch (error) {
+    // Log the error for debugging
+    console.error("Error while retrieving bookings:", error);
+
+    // Throw a specific error or a general one
+    throw new Error("Failed to retrieve bookings. Please try again later!");
+  } finally {
+    // Ensure Prisma client disconnects
+    await prisma.$disconnect();
+  }
 };
 
 export default getBookings;

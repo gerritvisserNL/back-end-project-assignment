@@ -83,7 +83,7 @@ model Property {
 
 model Amenity {
   id   String @id @default(uuid())
-  name String @unique
+  name String
 
   // Many-to-many: Many amenities can have many properties (via Prisma's join table)
   properties Property[] @relation("PropertyAmenity")

@@ -1,12 +1,20 @@
 import { PrismaClient } from "@prisma/client";
 
-const getAmenityById = async (id) => {
-  const prisma = new PrismaClient();
-  const amenity = await prisma.amenity.findUnique({
-    where: { id },
-  });
+const prisma = new PrismaClient();
 
-  return amenity;
+const getAmenityById = async (id) => {
+  try {
+    const amenity = await prisma.amenity.findUnique({
+      where: { id },
+    });
+
+    return amenity;
+  } catch (error) {
+    console.error("Error retrieving amenity by id:", error);
+    throw new Error("Failed to retrieve amenity by id");
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default getAmenityById;

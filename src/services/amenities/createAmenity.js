@@ -1,16 +1,33 @@
 import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
+
 const createAmenity = async (name) => {
-  const prisma = new PrismaClient();
-  const newAmenity = {
-    name,
-  };
+  try {
+    const amenity = await prisma.amenity.create({
+      data: { name },
+    });
 
-  const amenity = await prisma.amenity.create({
-    data: newAmenity,
-  });
+    return {
+      status: 201,
+      message: "Amenity succesfully created",
+      data: amenity,
+    };
+  } catch (error) {
+    console.error("Error in createAmenity:", error);
 
-  return amenity;
+    if (error.code === "P2002") {
+      return {
+        status: 409,
+        message: "An amenity with this name already exists.",
+      };
+    }
+
+    return {
+      status: 500,
+      message: "An error occured while creating amenity.",
+    };
+  }
 };
 
 export default createAmenity;

@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
+
 const createBooking = async (
   userId,
   propertyId,
@@ -9,8 +11,6 @@ const createBooking = async (
   totalPrice,
   bookingStatus
 ) => {
-  const prisma = new PrismaClient();
-
   try {
     // Check for overlapping bookings
     const overlappingBooking = await prisma.booking.findFirst({
@@ -31,13 +31,13 @@ const createBooking = async (
 
     if (overlappingBooking) {
       const error = new Error(
-        "The property is already booked for the selected dates."
+        "The accommodation is booked for the selected dates."
       );
       error.status = 409; // Conflict
-      throw error; // Throws the specific error if dates are overlapped
+      throw error;
     }
 
-    // Proceed with creating the booking
+    // Create booking
     const newBooking = {
       userId,
       propertyId,
@@ -54,15 +54,33 @@ const createBooking = async (
 
     return booking;
   } catch (error) {
-    // Rethrow specific errors so they can be handled properly
+    // Log the error with detailed context
+    console.error("Error while creating booking:", {
+      message: error.message,
+      status: error.status || 500,
+      stack: error.stack,
+      details: {
+        userId,
+        propertyId,
+        checkinDate,
+        checkoutDate,
+        numberOfGuests,
+        totalPrice,
+        bookingStatus,
+      },
+    });
+
     if (error.status === 409) {
-      throw error; // Re-throw the specific error for the router
+      throw error;
     } else {
-      // Handle unexpected errors with a generic message
-      throw new Error("Unable to create booking. Please try again later.");
+      // General error for other cases
+      const generalError = new Error(
+        "Cannot create booking. Please try again later."
+      );
+      generalError.status = 500;
+      throw generalError;
     }
   } finally {
-    // Ensure the Prisma client is disconnected to avoid connection leaks
     await prisma.$disconnect();
   }
 };

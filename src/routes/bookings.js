@@ -8,7 +8,6 @@ import auth from "../middleware/auth.js";
 
 const router = Router();
 
-// Create a new booking
 router.post("/", auth, async (req, res, next) => {
   try {
     const {
@@ -20,6 +19,31 @@ router.post("/", auth, async (req, res, next) => {
       totalPrice,
       bookingStatus,
     } = req.body;
+
+    // Basic validation
+    if (
+      !userId ||
+      !propertyId ||
+      !checkinDate ||
+      !checkoutDate ||
+      !numberOfGuests ||
+      !totalPrice ||
+      !bookingStatus
+    ) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+
+    // Date validation
+    const checkin = new Date(checkinDate);
+    const checkout = new Date(checkoutDate);
+
+    if (isNaN(checkin.getTime()) || isNaN(checkout.getTime())) {
+      return res.status(400).json({
+        message: "Invalid dates. Use valid ISO 8601 format (YYYY-MM-DD).",
+      });
+    }
 
     const newBooking = await createBooking(
       userId,
@@ -50,16 +74,28 @@ router.get("/", async (req, res, next) => {
       bookingStatus,
     } = req.query;
 
+    const filter = {};
+    if (userId) filter.userId = userId;
+    if (propertyId) filter.propertyId = propertyId;
+    if (checkinDate) filter.checkinDate = checkinDate;
+    if (checkoutDate) filter.checkoutDate = checkoutDate;
+    if (numberOfGuests) filter.numberOfGuests = numberOfGuests;
+    if (totalPrice) filter.totalPrice = totalPrice;
+    if (bookingStatus) filter.bookingStatus = bookingStatus;
+
     // getBookings call with filter
-    const bookings = await getBookings(
-      userId,
-      propertyId,
-      checkinDate,
-      checkoutDate,
-      numberOfGuests,
-      totalPrice,
-      bookingStatus
-    );
+    const bookings = await getBookings(filter);
+
+    // Check bookings with specific userId
+    if (userId) {
+      if (bookings.length === 0) {
+        return res
+          .status(404)
+          .json({ error: `No bookings found for user with id ${userId}` });
+      }
+      return res.status(200).json(bookings); // Return booking with match userId
+    }
+
     res.json(bookings);
   } catch (error) {
     next(error);

@@ -1,41 +1,30 @@
 import { PrismaClient } from "@prisma/client";
 
-const getUsers = async (
-  id,
-  username,
-  name,
-  email,
-  phoneNumber,
-  profilePicture
-) => {
-  const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 
-  // Empty filter object
-  const filter = {};
+const getUsers = async () => {
+  try {
+    // Fetch all users without any filter
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true,
+        phoneNumber: true,
+        profilePicture: true, // Exclude the password field
+      },
+    });
 
-  // Only add fields to filter that have a value
-  if (id) filter.id = id;
-  if (username) filter.username = username;
-  if (name) filter.name = name;
-  if (email) filter.email = email;
-  if (phoneNumber) filter.phoneNumber = phoneNumber;
-  if (profilePicture) filter.profilePicture = profilePicture;
+    // Return the users if the query is successful
+    return users;
+  } catch (error) {
+    // Log the error details for debugging
+    console.error("Error fetching users:", error);
 
-  // Find users who match filter criteria
-  const users = await prisma.user.findMany({
-    where: filter,
-    select: {
-      id: true,
-      username: true,
-      name: true,
-      email: true,
-      phoneNumber: true,
-      profilePicture: true,
-      // Exclude the password field
-    },
-  });
-
-  return users;
+    // Throw a new error to be caught by the calling function (e.g., router)
+    throw new Error("Failed to fetch users");
+  }
 };
 
 export default getUsers;

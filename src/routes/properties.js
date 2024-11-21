@@ -8,7 +8,6 @@ import auth from "../middleware/auth.js";
 
 const router = Router();
 
-// Create a new property
 router.post("/", auth, async (req, res, next) => {
   try {
     const {
@@ -22,6 +21,25 @@ router.post("/", auth, async (req, res, next) => {
       hostId,
       rating,
     } = req.body;
+
+    // Validate input data
+    if (
+      !title ||
+      !description ||
+      !location ||
+      !pricePerNight ||
+      !bedroomCount ||
+      !bathRoomCount ||
+      !maxGuestCount ||
+      !hostId ||
+      !rating
+    ) {
+      return res.status(400).json({
+        message: "All fields are required.",
+      });
+    }
+
+    // Call the service
     const newProperty = await createProperty(
       title,
       description,
@@ -43,19 +61,45 @@ router.post("/", auth, async (req, res, next) => {
 // Get all properties with optional query parameters
 router.get("/", async (req, res, next) => {
   try {
-    // Get queryparameters and set default values.
-    const location = req.query.location || ""; // Default: empty string
+    // Get query parameters and set default values
+    const location = req.query.location || "";
     const pricePerNight = req.query.pricePerNight
       ? parseFloat(req.query.pricePerNight)
       : undefined; // Cast to float
-    const amenities = req.query.amenities || ""; // Default: empty string
+    const amenities = req.query.amenities || "";
 
-    // Call getProperties()
-    const properties = await getProperties(location, pricePerNight, amenities);
+    // Initialize an empty filter object
+    const filter = {};
 
+    // Add filters to the object only if they have a value
+    if (location && typeof location === "string") {
+      // Ensure the search is case-insensitive by converting both to lowercase
+      filter.location = { contains: location.toLowerCase() }; // Remove `mode: "insensitive"`
+    }
+
+    if (pricePerNight && !isNaN(pricePerNight)) {
+      filter.pricePerNight = { lte: pricePerNight }; // Filter by price less than or equal to pricePerNight
+    }
+
+    if (amenities && typeof amenities === "string") {
+      // Split the amenities string by commas and trim extra spaces
+      const amenitiesArray = amenities
+        .split(",")
+        .map((amenity) => amenity.trim());
+
+      // Only add the filter if the array is not empty
+      if (amenitiesArray.length > 0) {
+        filter.amenities = { some: { name: { in: amenitiesArray } } }; // Correct filter using `some`
+      }
+    }
+
+    // Call getProperties() with the constructed filter
+    const properties = await getProperties(filter);
+
+    // Return the properties in the response
     res.json(properties);
   } catch (error) {
-    next(error);
+    next(error); // Pass any errors to the error handling middleware
   }
 });
 
@@ -64,14 +108,12 @@ router.get("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
     const property = await getPropertyById(id);
-
-    if (!property) {
-      res.status(404).json({ message: `Property with id ${id} not found` });
-    } else {
-      res.status(200).json(property);
-    }
+    res.status(200).json(property); // Property found, return it with status 200
   } catch (error) {
-    next(error);
+    // If an error was thrown in the service, handle it here
+    res.status(error.statusCode || 500).json({
+      message: error.message || "Internal Server Error", // Default to 500 if no specific statusCode
+    });
   }
 });
 

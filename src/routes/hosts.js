@@ -20,6 +20,16 @@ router.post("/", auth, async (req, res, next) => {
       profilePicture,
       aboutMe,
     } = req.body;
+
+    // Check if all required fields are provided
+    if (!username || !password || !name || !email || !phoneNumber) {
+      return res.status(400).json({
+        message:
+          "Username, password, name, email, and phoneNumber are required.",
+      });
+    }
+
+    // Call the createHost service
     const newHost = await createHost(
       username,
       password,
@@ -30,9 +40,9 @@ router.post("/", auth, async (req, res, next) => {
       aboutMe
     );
 
-    res.status(201).json(newHost);
+    return res.status(201).json(newHost);
   } catch (error) {
-    next(error);
+    next(error); // Pass the error to the error handler
   }
 });
 
@@ -42,15 +52,28 @@ router.get("/", async (req, res, next) => {
     const { username, name, email, phoneNumber, profilePicture, aboutMe } =
       req.query;
 
-    // getHosts call with filter
-    const hosts = await getHosts({
-      username,
-      name,
-      email,
-      phoneNumber,
-      profilePicture,
-      aboutMe,
-    });
+    // Create empty filter object
+    const filter = {};
+
+    if (name) filter.name = name;
+
+    if (username) filter.username = username;
+    if (email) filter.email = email;
+    if (phoneNumber) filter.phoneNumber = phoneNumber;
+    if (profilePicture) filter.profilePicture = profilePicture;
+    if (aboutMe) filter.aboutMe = aboutMe;
+
+    // Call getHosts with filter
+    const hosts = await getHosts(filter);
+
+    // Give first match with given name
+    if (name) {
+      if (hosts.length === 0) {
+        return res.status(404).json({ error: `No host found with this name` });
+      }
+      return res.status(200).json(hosts[0]);
+    }
+
     res.json(hosts);
   } catch (error) {
     next(error);
@@ -64,10 +87,10 @@ router.get("/:id", async (req, res, next) => {
     const host = await getHostById(id);
 
     if (!host) {
-      res.status(404).json({ message: `Host with id ${id} not found` });
-    } else {
-      res.status(200).json(host);
+      return res.status(404).json({ message: `Host with ID ${id} not found` });
     }
+
+    res.status(200).json(host);
   } catch (error) {
     next(error);
   }
@@ -114,17 +137,17 @@ router.put("/:id", auth, async (req, res, next) => {
 router.delete("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const host = await deleteHostById(id);
 
-    if (host) {
-      res.status(200).send({
-        message: `Host with id ${id} successfully deleted`,
-      });
-    } else {
-      res.status(404).json({
-        message: `Host with id ${id} not found`,
+    const deletedHostId = await deleteHostById(id);
+
+    if (deletedHostId) {
+      return res.status(200).json({
+        message: `Host with id ${deletedHostId} successfully deleted`,
       });
     }
+
+    // If no host was deleted, send a 404
+    return res.status(404).json({ message: "Host not found" });
   } catch (error) {
     next(error);
   }
