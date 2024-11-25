@@ -29,12 +29,10 @@ const getBookings = async (
     if (totalPrice) filter.totalPrice = Number(totalPrice);
     if (bookingStatus) filter.bookingStatus = bookingStatus;
 
-    console.log("Filter", filter);
     // Retrieve bookings with filter
     const bookings = await prisma.booking.findMany({
       where: filter,
     });
-    console.log("Bookings:", bookings);
 
     return bookings;
   } catch (error) {

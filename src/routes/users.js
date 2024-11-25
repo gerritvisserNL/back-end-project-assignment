@@ -65,11 +65,9 @@ router.get("/", async (req, res, next) => {
 
     if (email || username) {
       if (users.length === 0) {
-        return res
-          .status(404)
-          .json({
-            error: `No user found with this ${email ? "email" : "username"}`,
-          });
+        return res.status(404).json({
+          error: `No user found with this ${email ? "email" : "username"}`,
+        });
       }
       return res.status(200).json(users[0]); // Return first user with email
     }
@@ -84,7 +82,20 @@ router.get("/", async (req, res, next) => {
 router.get("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
+
+    // validation: Check if id is a valid UUID
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
     const user = await getUserById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
     return res.status(200).json(user);
   } catch (error) {
     const statusCode = error.statusCode || 500;

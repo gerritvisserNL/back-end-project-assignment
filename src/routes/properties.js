@@ -78,7 +78,7 @@ router.get("/", async (req, res, next) => {
     }
 
     if (pricePerNight && !isNaN(pricePerNight)) {
-      filter.pricePerNight = { lte: pricePerNight }; // Filter by price less than or equal to pricePerNight
+      filter.pricePerNight = { equals: pricePerNight }; // Filter by pricePerNight
     }
 
     if (amenities && typeof amenities === "string") {

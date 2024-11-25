@@ -1,21 +1,19 @@
 import winston from "winston";
 
 const logger = winston.createLogger({
-  level: process.env.NODE_ENV === "development" ? "info" : "error", // Logniveaus: 'info' in dev en 'error' in productie
+  level: process.env.NODE_ENV === "development" ? "info" : "error", // Logniveaus: 'info' in dev and 'error' in production
   format: winston.format.json(),
   defaultMeta: { service: "bookings-api" },
 });
 
-// In dev omgeving toevoegen van console output met gedetailleerde logberichten
+// In dev environment add console output with detailed log messages
 if (process.env.NODE_ENV !== "production") {
   logger.add(
     new winston.transports.Console({
-      format: winston.format.simple(), // Toont logberichten in een simpele tekstformaat
+      format: winston.format.simple(), // Displays log messages in a simple text format
     })
   );
 } else {
-  // Als je in productie bent, kun je loggen naar bestanden of andere transports.
-  // Hier voeg je een file transport toe voor productie bijvoorbeeld:
   logger.add(
     new winston.transports.File({ filename: "error.log", level: "error" })
   );
